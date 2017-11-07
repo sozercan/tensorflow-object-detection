@@ -1,0 +1,48 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: tensorflow-serving
+  labels:
+    app: tensorflow-serving
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tensorflow-serving
+  template:
+    metadata:
+      labels:
+        app: tensorflow-serving
+    spec:
+      containers:
+      - name: tensorflow-serving
+        image: "{{ .Values.image.repository }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        command:
+        - "/bin/sh"
+        - "-c"
+        args:
+        - "/serving/bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port={{ .Values.port }} --model_name={{ .Values.model_name }} --model_base_path={{ .Values.model_path }}"
+        ports:
+        - containerPort: {{ .Values.port }}
+        volumeMounts:
+          - mountPath: /data
+            name: azurefile
+      volumes:
+        - name: azurefile
+          azureFile:
+              secretName: serving-azure-secret
+              shareName: data
+              readOnly: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tensorflow-serving
+spec:
+  ports:
+  - port: {{ .Values.port }}
+    targetPort: {{ .Values.port }}
+  selector:
+    app: tensorflow-serving
+  type: LoadBalancer

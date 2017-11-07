@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tensorflow-serving-client
+spec:
+  template:
+    metadata:
+      name: tensorflow-serving-client
+    spec:
+      containers:
+      - name: tensorflow-serving-client
+        image: "{{ .Values.image.repository }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        command:
+        - "/bin/sh"
+        - "-c"
+        args:
+        - "python serving_client.py --image {{ .Values.image_url }} --server {{ .Values.server_url }}:{{ .Values.server_port }} --label_map_path {{ .Values.label_map_path }} --model_name {{ .Values.model_name }} --save_path {{ .Values.save_path }} --num_classes {{ .Values.num_classes }} --signature_name {{ .Values.signature_name }}"
+        ports:
+        - containerPort: {{ .Values.server_port }}
+        volumeMounts:
+          - mountPath: /data
+            name: azurefile
+      restartPolicy: Never
+      volumes:
+        - name: azurefile
+          azureFile:
+              secretName: serving-azure-secret
+              shareName: data
+              readOnly: false

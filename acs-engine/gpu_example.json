@@ -1,0 +1,42 @@
+{
+    "apiVersion": "vlabs",
+    "properties": {
+      "orchestratorProfile": {
+        "orchestratorType": "Kubernetes",
+        "orchestratorRelease": "1.8",
+        "kubernetesConfig": {
+          "enableRbac": true,
+          "enableAggregatedAPIs": true
+        }
+      },
+      "masterProfile": {
+        "count": 1,
+        "dnsPrefix": "[REPLACEME]",
+        "vmSize": "Standard_DS2_v2",
+        "storageProfile": "ManagedDisks"
+      },
+      "agentPoolProfiles": [
+        {
+          "name": "agentpool",
+          "count": 3,
+          "vmSize": "Standard_NC6",
+          "availabilityProfile": "AvailabilitySet",
+          "storageProfile": "ManagedDisks"
+        }
+      ],
+      "linuxProfile": {
+        "adminUsername": "azureuser",
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "[REPLACEME]"
+            }
+          ]
+        }
+      },
+      "servicePrincipalProfile": {
+        "clientId": "[REPLACEME]",
+        "secret": "[REPLACEME]"
+      }
+    }
+  }

@@ -1,0 +1,107 @@
+apiVersion: "tensorflow.org/v1alpha1"
+kind: "TfJob"
+metadata:
+  name: tensorflow-object-detection
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  tensorboard:
+    logDir: /data
+    serviceType: LoadBalancer
+    volumes:
+      - name: azurefile
+        azureFile:
+            secretName: azure-secret
+            shareName: data
+            readOnly: false
+    volumeMounts:
+      - mountPath: /data
+        name: azurefile
+  replicaSpecs:
+    - replicas: 1
+      tfPort: 2222
+      tfReplicaType: MASTER
+      template:
+        spec:
+          containers:
+            - image: "{{ .Values.image.repository }}:{{ .Values.image.tag_gpu }}"
+              name: tensorflow
+              env:
+              - name: LC_ALL
+                value: C.UTF-8
+              command:
+                - python
+                - object_detection/train_eval.py
+                - --logtostderr
+                - --pipeline_config_path
+                - "{{ .Values.pipeline_config_path }}"
+                - --train_dir
+                - "{{ .Values.train_dir_path }}"
+                - --eval_dir
+                - "{{ .Values.eval_dir_path }}"
+              resources:
+                    limits:
+                      alpha.kubernetes.io/nvidia-gpu: 1
+              volumeMounts:
+                - mountPath: /data
+                  name: azurefile
+          restartPolicy: OnFailure
+          volumes:
+            - name: azurefile
+              azureFile:
+                  secretName: azure-secret
+                  shareName: data
+                  readOnly: false
+    - replicas: 2
+      tfPort: 2222
+      tfReplicaType: WORKER
+      template:
+        spec:
+          containers:
+            - image: "{{ .Values.image.repository }}:{{ .Values.image.tag_gpu }}"
+              name: tensorflow
+              env:
+              - name: LC_ALL
+                value: C.UTF-8
+              command:
+                - python
+                - object_detection/train_eval.py
+                - --logtostderr
+                - --pipeline_config_path
+                - "{{ .Values.pipeline_config_path }}"
+                - --train_dir
+                - "{{ .Values.train_dir_path }}"
+                - --eval_dir
+                - "{{ .Values.eval_dir_path }}"
+              resources:
+                    limits:
+                      alpha.kubernetes.io/nvidia-gpu: 1
+              volumeMounts:
+                - mountPath: /data
+                  name: azurefile
+          restartPolicy: OnFailure
+          volumes:
+            - name: azurefile
+              azureFile:
+                  secretName: azure-secret
+                  shareName: data
+                  readOnly: false
+    - replicas: 2
+      tfPort: 2222
+      tfReplicaType: PS
+      template:
+        spec:
+          containers:
+            - image: "{{ .Values.image.repository }}:{{ .Values.image.tag_cpu }}"
+              name: tensorflow
+              command:
+                - python
+                - object_detection/train_eval.py
+                - --logtostderr
+                - --pipeline_config_path
+                - "{{ .Values.pipeline_config_path }}"
+                - --train_dir
+                - "{{ .Values.train_dir_path }}"
+                - --eval_dir
+                - "{{ .Values.eval_dir_path }}"
+          restartPolicy: OnFailure

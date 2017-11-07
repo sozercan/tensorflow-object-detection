@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Helm chart for Tensorflow Serving model server
+name: tensorflow-serving
+version: 0.1.0

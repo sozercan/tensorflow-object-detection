@@ -1,0 +1,14 @@
+# Default values for param-sweep.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+  repository: sozercan/tensorflow-object-detection
+  tag_gpu: gpu
+  tag_cpu: cpu
+  pullPolicy: IfNotPresent
+train_dir_path: /data/train
+pipeline_config_path: /data/faster_rcnn_resnet101_voc07.config
+eval_dir_path: /data/eval
+log_dir_path: /data
+azure_storage_account_name:
+azure_storage_account_key:
