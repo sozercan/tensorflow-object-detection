@@ -25,6 +25,7 @@ spec:
         spec:
           containers:
             - image: "{{ .Values.image.repository }}:{{ .Values.image.tag_gpu }}"
+              imagePullPolicy:  "{{ .Values.image.pullPolicy }}"
               name: tensorflow
               env:
               - name: LC_ALL
@@ -59,6 +60,7 @@ spec:
         spec:
           containers:
             - image: "{{ .Values.image.repository }}:{{ .Values.image.tag_gpu }}"
+              imagePullPolicy:  "{{ .Values.image.pullPolicy }}"
               name: tensorflow
               env:
               - name: LC_ALL
@@ -93,6 +95,7 @@ spec:
         spec:
           containers:
             - image: "{{ .Values.image.repository }}:{{ .Values.image.tag_cpu }}"
+              imagePullPolicy:  "{{ .Values.image.pullPolicy }}"
               name: tensorflow
               command:
                 - python
@@ -104,4 +107,13 @@ spec:
                 - "{{ .Values.train_dir_path }}"
                 - --eval_dir
                 - "{{ .Values.eval_dir_path }}"
+              volumeMounts:
+                - mountPath: /data
+                  name: azurefile
           restartPolicy: OnFailure
+          volumes:
+            - name: azurefile
+              azureFile:
+                  secretName: azure-secret
+                  shareName: data
+                  readOnly: false

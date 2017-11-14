@@ -9,6 +9,6 @@ label_map_path: /data/pascal_label_map.pbtxt
 save_path: /data/
 server_port: 9000
 signature_name: serving_default
-num_classes: 1
+num_classes: 20
 image_url:
 server_url:
